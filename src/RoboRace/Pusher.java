@@ -23,6 +23,10 @@ public class Pusher implements Decoration {
 	}
 	
 	public void effect(EventCounter counter, EventList events, int phase, Robot robot, Board board) {
+            if (phase1 == phase3 || phase2 == phase3){
+                board.step(counter, events, robot, direction.halfturn());
+                events.add(new MoveEvent(counter, robot.getLocation(), direction.halfturn()));
+            }
 	}
 	
 	public String toXMLString() {
