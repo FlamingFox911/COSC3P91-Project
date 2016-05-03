@@ -9,6 +9,7 @@ public class GameMaster {
     private Board board;
     private Factory factory;
     private Player[] player;
+    private CardList[] resultHand;
     private CardFactory cardFactory;
     
     public GameMaster (int numberPlayers, String[] name){
@@ -32,18 +33,34 @@ public class GameMaster {
         for (int i = 0; i < numberPlayers; i++){
             player[i].receiveBoard(board);
         }
+        CardList[] playerHand = new CardList[numberPlayers];
+        CardList[] resultHand = new CardList[numberPlayers];
         // loop
-        // Generate new card set.
-        CardList playerHand = new CardList();
+        // Revitalize robots
+        // Generate new card set and distribute
         cardFactory = new CardFactory();
-        // Distribute card.
         for (int i = 0; i < numberPlayers; i++){
-            playerHand.clear();
+            playerHand[i] = new CardList();
+            resultHand[i] = new CardList();
             for (int j = 0; j < 7; j++){
-                playerHand.add(cardFactory.createCard());
+                playerHand[i].add(cardFactory.createCard());
             }
-            player[i].selectCards(playerHand);
+            // receive chosen card list
+            resultHand[i] = player[i].selectCards(playerHand[i]);
         }
+        // Sort Cards and execute per action.
+        Card Card[] = new Card[5];
+        int associate[] = new int[5];
+        for (int i = 0; i < 5; i++){
+            for (int j = 0; j < numberPlayers; j++){
+                Card[j] = resultHand[j].pop();
+            }
+            // Sort
+            for (int j = 0; j < numberPlayers; j++){
+                //
+            }
+        }
+        // execute tile effect
         // end loop
     }
 }
