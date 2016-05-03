@@ -15,8 +15,8 @@ public class GameMaster {
         this.numberPlayers = numberPlayers;
     }
     
-    public static void run(String[] args){
-        System.out.print("Hello, World! I am the GameMaster.");
-        System.out.println("Are you you the PlayerKeeper?");
+    public void run(){
+        System.out.print("Hello, World! I am the GameMaster.\n");
+        System.out.print("Are you you the PlayerKeeper?");
     }
 }		

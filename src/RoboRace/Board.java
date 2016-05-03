@@ -41,12 +41,11 @@ public class Board implements XMLObject {
 	public void step(EventCounter counter, EventList events, Robot robot, Direction direction) {
             // Set locations and directions
             Point sLoc = robot.getLocation();
-            Direction dir = robot.getDirection();
             int x = (int)sLoc.getX();
             int y = (int)sLoc.getY();
             int finX = x;
             int finY = y;
-            switch (dir){
+            switch (direction){
                 case North:
                     finY -= 1;
                     break;
@@ -61,27 +60,24 @@ public class Board implements XMLObject {
                     break;
             }
             Location fLoc = getLocation(finX, finY);
-            if (getLocation(sLoc).hasWall(dir)){
-                events.add(new BumpEvent(counter, x, y, dir));
+            if (getLocation(sLoc).hasWall(direction)){
+                events.add(new BumpEvent(counter, x, y, direction));
             }
             else if (robotAt(finX, finY) != null){
-                step(counter, events, robotAt(finX, finY), dir);
+                step(counter, events, robotAt(finX, finY), direction);
                 if (robotAt(finX, finY) != null){
-                    events.add(new BumpEvent(counter, x, y, dir));
+                    events.add(new BumpEvent(counter, x, y, direction));
                 }
                 else {
-                    robot.move(dir);
-                    events.add(new MoveEvent(counter, x, y, dir));
+                    robot.move(direction);
+                    events.add(new MoveEvent(counter, x, y, direction));
                 }
             }
-            else if (fLoc.isPit()){
-                events.add(new MoveEvent(counter, x, y, dir));
-                events.add(new DestroyedEvent(counter, finX, finY));
-            }
             else {
-                robot.move(dir);
-                events.add(new MoveEvent(counter, x, y, dir));
-                if (finX < 0 || finY < 0 || finX >= factory.getXSize() || finY >= factory.getYSize()){
+                robot.move(direction);
+                events.add(new MoveEvent(counter, x, y, direction));
+                if (fLoc.isPit() || finX < 0 || finY < 0 || finX >= factory.getXSize() || finY >= factory.getYSize()){
+                    robot.destroyed();
                     events.add(new DestroyedEvent(counter, finX, finY));
                 }
             }

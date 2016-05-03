@@ -21,6 +21,7 @@ public class CardMove extends Card {
             Direction dir = robot.getDirection();
             Point loc = robot.getLocation();
             for (int i = 0; i < steps; i++){
+                if (!robot.isAlive()) break;
                 events.add(new MoveEvent(counter, loc, dir));
                 board.step(counter, events, robot, dir);
                 counter.increaseStep();

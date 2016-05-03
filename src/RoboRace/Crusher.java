@@ -15,8 +15,9 @@ public class Crusher implements Decoration {
 	}
 	
 	public void effect(EventCounter counter, EventList events, int phase, Robot robot, Board board) {
-            if (phase1 == phase2){
+            if (phase == phase1 || phase == phase2){
                 events.add(new DestroyedEvent(counter, robot.getLocation()));
+                counter.increase();
             }
 	}
 	
