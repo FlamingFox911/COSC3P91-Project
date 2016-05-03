@@ -32,11 +32,10 @@ public class Location implements XMLObject {
 	}
 	
 	public void effect(EventCounter counter, EventList events, int phase, Robot robot, Board board) {
-            Direction dir = robot.getDirection();
-            Point loc = robot.getLocation();
             if (decoration != null){
                 decoration.effect(counter, events, phase, robot, board);
             }
+            Point loc = robot.getLocation();
             Point locF = robot.getLocation();
             if (loc.equals(locF) && robot.isAlive()){
                 tile.effect(counter, events, robot, board);

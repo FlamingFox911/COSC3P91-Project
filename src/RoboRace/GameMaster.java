@@ -9,22 +9,43 @@ public class GameMaster {
     private Board board;
     private Factory factory;
     private Player[] player;
-    private CardList[] resultHand;
+    private Robot[] robot;
     private CardFactory cardFactory;
+    private EventList eventList;
+    private EventCounter eventCounter;
     
     public GameMaster (int numberPlayers, String[] name){
         this.numberPlayers = numberPlayers;
         this.player = new Player[numberPlayers];
-        Robot[] robot = new Robot[numberPlayers];
+        this.robot = new Robot[numberPlayers];
+        this.eventList = new EventList();
+        this.eventCounter = new EventCounter();
         for (int i = 0; i < numberPlayers; i++){
             robot[i] = new Robot(name[i], 2*i + 1);
         }
-        factory = Factory.load("factory.xml");
-        board = new Board(factory, numberPlayers, robot);
+        this.factory = Factory.load("factory.xml");
+        this.board = new Board(this.factory, numberPlayers, this.robot);
         for (int i = 0; i < numberPlayers; i++){
-            player[i] = new Player(name[i]);
+            this.player[i] = new Player(name[i]);
         }
     }
+    
+    private class SortCard implements Comparable<SortCard>{
+	private Card card;
+	private int player;
+	
+	public SortCard(Card card, int player) {
+		super();
+		this.card = card;
+		this.player = player;
+	}
+	
+        @Override
+	public int compareTo(SortCard cCard) {
+            int cPriority = ((SortCard) cCard).card.getPriority(); 
+            return this.card.getPriority() - cPriority;	
+	}	
+}
     
     public void run(){
         System.out.print("Hello, World! I am the GameMaster.\n");
@@ -35,32 +56,39 @@ public class GameMaster {
         }
         CardList[] playerHand = new CardList[numberPlayers];
         CardList[] resultHand = new CardList[numberPlayers];
-        // loop
-        // Revitalize robots
-        // Generate new card set and distribute
         cardFactory = new CardFactory();
-        for (int i = 0; i < numberPlayers; i++){
-            playerHand[i] = new CardList();
-            resultHand[i] = new CardList();
-            for (int j = 0; j < 7; j++){
-                playerHand[i].add(cardFactory.createCard());
+        // loop
+        while (true){
+            // Revitalize robots
+            board.revitalize();
+            // Generate new card set and distribute
+            for (int i = 0; i < numberPlayers; i++){
+                playerHand[i] = new CardList();
+                resultHand[i] = new CardList();
+                for (int j = 0; j < 7; j++){
+                    playerHand[i].add(cardFactory.createCard());
+                }
+                // Receive chosen card list
+                resultHand[i] = player[i].selectCards(playerHand[i]);
             }
-            // receive chosen card list
-            resultHand[i] = player[i].selectCards(playerHand[i]);
+            // Sort Cards and execute per action.
+            SortCard sc[] = new SortCard[numberPlayers];
+            for (int i = 0; i < 5; i++){
+                for (int j = 0; j < numberPlayers; j++){
+                    sc[j] = new SortCard(resultHand[j].pop(), j);
+                }
+                Arrays.sort(sc);
+                for (int j = 0; j < numberPlayers; j++){
+                    int p = sc[j].player;
+                    Card c = sc[j].card;
+                    c.execute(eventCounter, eventList, robot[p], board);
+                    board.getLocation(robot[p].getLocation()).effect(eventCounter, eventList, i, robot[p], board);
+                }
+            }
+            
+            // execute tile effect
+            
         }
-        // Sort Cards and execute per action.
-        Card Card[] = new Card[5];
-        int associate[] = new int[5];
-        for (int i = 0; i < 5; i++){
-            for (int j = 0; j < numberPlayers; j++){
-                Card[j] = resultHand[j].pop();
-            }
-            // Sort
-            for (int j = 0; j < numberPlayers; j++){
-                //
-            }
-        }
-        // execute tile effect
         // end loop
     }
 }

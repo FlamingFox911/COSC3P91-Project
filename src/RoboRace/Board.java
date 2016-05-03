@@ -59,26 +59,32 @@ public class Board implements XMLObject {
                     finX -= 1;
                     break;
             }
-            Location fLoc = getLocation(finX, finY);
-            if (getLocation(sLoc).hasWall(direction)){
-                events.add(new BumpEvent(counter, x, y, direction));
+            if (finX < 0 || finY < 0 || finX >= factory.getXSize() || finY >= factory.getYSize()){
+                robot.destroyed();
+                events.add(new DestroyedEvent(counter, finX, finY));
             }
-            else if (robotAt(finX, finY) != null){
-                step(counter, events, robotAt(finX, finY), direction);
-                if (robotAt(finX, finY) != null){
+            else{
+                Location fLoc = getLocation(finX, finY);
+                if (getLocation(sLoc).hasWall(direction)){
                     events.add(new BumpEvent(counter, x, y, direction));
+                }
+                else if (robotAt(finX, finY) != null){
+                    step(counter, events, robotAt(finX, finY), direction);
+                    if (robotAt(finX, finY) != null){
+                        events.add(new BumpEvent(counter, x, y, direction));
+                    }
+                    else {
+                        robot.move(direction);
+                        events.add(new MoveEvent(counter, x, y, direction));
+                    }
                 }
                 else {
                     robot.move(direction);
                     events.add(new MoveEvent(counter, x, y, direction));
-                }
-            }
-            else {
-                robot.move(direction);
-                events.add(new MoveEvent(counter, x, y, direction));
-                if (fLoc.isPit() || finX < 0 || finY < 0 || finX >= factory.getXSize() || finY >= factory.getYSize()){
-                    robot.destroyed();
-                    events.add(new DestroyedEvent(counter, finX, finY));
+                    if (fLoc.isPit() || finX < 0 || finY < 0 || finX >= factory.getXSize() || finY >= factory.getYSize()){
+                        robot.destroyed();
+                        events.add(new DestroyedEvent(counter, finX, finY));
+                    }
                 }
             }
 	}
