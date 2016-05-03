@@ -11,30 +11,42 @@ public class Player extends JFrame {
     private Board board;
     private BoardCanvas boardCanvas;
     private CardPane cardPane;
-    
-    public Player(String name, Board board, BoardCanvas boardCanvas, CardPane cardPane){
+
+    public Player(String name){
         this.name = name;
-        this.board = board;
-        this.boardCanvas = boardCanvas;
-        this.cardPane = cardPane;
     }
     
-    Board recieveBoard(Board in){
-        return in;
+    public void receiveBoard(Board in){
+        this.board = in;
+        this.boardCanvas = new BoardCanvas(board);
+        this.cardPane = new CardPane();
+        getContentPane().add("North",boardCanvas);
+        getContentPane().add("South",cardPane);
+        pack();
+        setResizable(false);
+        setVisible(true);
+        boardCanvas.start();
+    }
+    
+    public void receiveEvents(EventList list){
+        //STUFF
     }
     
     CardList selectCards(CardList list){
         return cardPane.selectCards(list);
     }
-    /* some code that will be needed for display
-
-            boardCanvas = new BoardCanvas(board);
-            cardPane = new CardPane();
-            getContentPane().add("North",boardCanvas);
-            getContentPane().add("South",cardPane);
-            pack();
-            setResizable(false);
-            setVisible(true);
-            boardCanvas.start();
+    
+    public void close(){
+        // STUFF
+    }
+    /* some code that will be needed for display...
+        boardCanvas = new BoardCanvas(board);
+        cardPane = new CardPane();
+        getContentPane().add("North",boardCanvas);
+        getContentPane().add("South",cardPane);
+        pack();
+        setResizable(false);
+        setVisible(true);
+        boardCanvas.start();
     */
 }
