@@ -13,8 +13,8 @@ public class Belt implements Tile {
 	}
 	
 	public void effect(EventCounter counter, EventList events, Robot robot, Board board) {
-            board.step(counter, events, robot, direction);
-            counter.increase();
+		board.step(counter,events,robot,direction);
+		counter.increase();
 	}
 	
 	public String toXMLString() {

@@ -18,15 +18,13 @@ public class CardMove extends Card {
 	}
 	
 	public void execute(EventCounter counter, EventList events, Robot robot, Board board) {
-            Direction dir = robot.getDirection();
-            Point loc = robot.getLocation();
-            for (int i = 0; i < steps; i++){
-                if (!robot.isAlive()) break;
-                events.add(new MoveEvent(counter, loc, dir));
-                board.step(counter, events, robot, dir);
-                counter.increaseStep();
-            }
-            counter.increase();
+		for(int i=0; i<steps; i++) {
+			if (robot.isAlive()) {
+				board.step(counter,events,robot,robot.getDirection());
+				counter.increaseStep();
+			};
+		};
+		counter.increaseAction();
 	}
 	
 	public String toXMLString() {

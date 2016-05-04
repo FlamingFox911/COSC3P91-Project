@@ -39,54 +39,42 @@ public class Board implements XMLObject {
 	}
 	
 	public void step(EventCounter counter, EventList events, Robot robot, Direction direction) {
-            // Set locations and directions
-            Point sLoc = robot.getLocation();
-            int x = (int)sLoc.getX();
-            int y = (int)sLoc.getY();
-            int finX = x;
-            int finY = y;
-            switch (direction){
-                case North:
-                    finY -= 1;
-                    break;
-                case East:
-                    finX += 1;
-                    break;
-                case South:
-                    finY += 1;
-                    break;
-                case West:
-                    finX -= 1;
-                    break;
-            }
-            if (finX < 0 || finY < 0 || finX >= factory.getXSize() || finY >= factory.getYSize()){
-                robot.destroyed();
-                events.add(new DestroyedEvent(counter, finX, finY));
-            }
-            else{
-                Location fLoc = getLocation(finX, finY);
-                if (getLocation(sLoc).hasWall(direction)){
-                    events.add(new BumpEvent(counter, x, y, direction));
-                }
-                else if (robotAt(finX, finY) != null){
-                    step(counter, events, robotAt(finX, finY), direction);
-                    if (robotAt(finX, finY) != null){
-                        events.add(new BumpEvent(counter, x, y, direction));
-                    }
-                    else {
-                        robot.move(direction);
-                        events.add(new MoveEvent(counter, x, y, direction));
-                    }
-                }
-                else {
-                    robot.move(direction);
-                    events.add(new MoveEvent(counter, x, y, direction));
-                    if (fLoc.isPit()){
-                        robot.destroyed();
-                        events.add(new DestroyedEvent(counter, finX, finY));
-                    }
-                }
-            }
+		Point location = robot.getLocation();
+		if (factory.hasWall(location,direction)) {
+			events.add(new BumpEvent(counter,location,direction));
+		} else {
+			int x = location.x;
+			int y = location.y;
+			switch (direction) {
+				case North: y--;
+							break;
+				case East:	x++;
+							break;
+				case South:	y++;
+							break;
+				case West:	x--;
+			};
+			if (x < 0 || x >= factory.getXSize() || y < 0 || y >= factory.getYSize() || getLocation(x,y).isPit()) {
+				events.add(new MoveEvent(counter,location,direction));
+				robot.setLocation(x,y);
+				events.add(new DestroyedEvent(counter,x,y));
+				robot.destroyed();
+			} else {
+				Robot robot2 = robotAt(x,y);
+				if (robot2 == null) {
+					events.add(new MoveEvent(counter,location,direction)); 
+					robot.setLocation(x,y);
+				} else {
+					step(counter,events,robot2,direction);
+					if (x == robot2.getLocation().x && y == robot2.getLocation().y)
+						events.add(new BumpEvent(counter,location,direction));
+					else {
+						events.add(new MoveEvent(counter,location,direction));
+						robot.setLocation(x,y);
+					};
+				};
+			};
+		};
 	}
 	
 	public void revitalize() {

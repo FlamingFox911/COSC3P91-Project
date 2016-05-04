@@ -14,11 +14,8 @@ public class CardBack extends Card {
 	}
 	
 	public void execute(EventCounter counter, EventList events, Robot robot, Board board) {
-            Direction dir = robot.getDirection();
-            Point loc = robot.getLocation();
-            events.add(new MoveEvent(counter, loc, dir.halfturn()));
-            board.step(counter, events, robot, dir.halfturn());
-            counter.increase();
+		board.step(counter,events,robot,robot.getDirection().halfturn());
+		counter.increase();
 	}
 	
 	public String toXMLString() {

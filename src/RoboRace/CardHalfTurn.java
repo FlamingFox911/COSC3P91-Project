@@ -14,11 +14,9 @@ public class CardHalfTurn extends Card {
 	}
 
 	public void execute(EventCounter counter, EventList events, Robot robot, Board board) {
-            Direction dir = robot.getDirection();
-            Point loc = robot.getLocation();
-            events.add(new HalfturnEvent(counter, loc));
-            robot.halfturn();
-            counter.increase();
+		events.add(new HalfturnEvent(counter,robot.getLocation()));
+		robot.halfturn();
+		counter.increase();
 	}
 	
 	public String toXMLString() {

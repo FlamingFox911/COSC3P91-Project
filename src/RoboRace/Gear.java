@@ -13,9 +13,9 @@ public class Gear implements Tile {
 	}
 	
 	public void effect(EventCounter counter, EventList events, Robot robot, Board board) {
-            robot.turn(clockwise);
-            events.add(new TurnEvent(counter, robot.getLocation(), clockwise));
-            counter.increase();
+		events.add(new TurnEvent(counter,robot.getLocation(),clockwise));
+		robot.turn(clockwise);
+		counter.increase();
 	}
 	
 	public String toXMLString() {
