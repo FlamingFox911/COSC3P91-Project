@@ -81,7 +81,7 @@ public class Board implements XMLObject {
                 else {
                     robot.move(direction);
                     events.add(new MoveEvent(counter, x, y, direction));
-                    if (fLoc.isPit() || finX < 0 || finY < 0 || finX >= factory.getXSize() || finY >= factory.getYSize()){
+                    if (fLoc.isPit()){
                         robot.destroyed();
                         events.add(new DestroyedEvent(counter, finX, finY));
                     }

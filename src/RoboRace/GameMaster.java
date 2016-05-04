@@ -58,7 +58,7 @@ public class GameMaster {
         CardList[] resultHand = new CardList[numberPlayers];
         cardFactory = new CardFactory();
         // loop
-        while (true){
+        while (!eventList.containsVictory()){
             // Revitalize robots
             board.revitalize();
             // Generate new card set and distribute
@@ -71,7 +71,7 @@ public class GameMaster {
                 // Receive chosen card list
                 resultHand[i] = player[i].selectCards(playerHand[i]);
             }
-            // Sort Cards and execute per action.
+            // Sort Cards, execute and effect robots per action.
             SortCard sc[] = new SortCard[numberPlayers];
             for (int i = 0; i < 5; i++){
                 for (int j = 0; j < numberPlayers; j++){
@@ -80,14 +80,19 @@ public class GameMaster {
                 Arrays.sort(sc);
                 for (int j = 0; j < numberPlayers; j++){
                     int p = sc[j].player;
-                    Card c = sc[j].card;
-                    c.execute(eventCounter, eventList, robot[p], board);
-                    board.getLocation(robot[p].getLocation()).effect(eventCounter, eventList, i, robot[p], board);
+                    if (robot[p].isAlive()){
+                        Card c = sc[j].card;
+                        c.execute(eventCounter, eventList, robot[p], board);
+                        board.getLocation(robot[p].getLocation()).effect(eventCounter, eventList, i, robot[p], board);
+                    }
                 }
+                if (eventList.containsVictory()) break;
             }
-            
-            // execute tile effect
-            
+
+        }
+        GameDialogs.showMessageDialog("End of Game", "The winner is " + eventList.getWinner() + "!!!");
+        for (int i = 0; i < numberPlayers; i++){
+            player[i].close();
         }
         // end loop
     }
