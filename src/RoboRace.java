@@ -21,5 +21,16 @@ public class RoboRace {
 	for (int i=0; i<nHuman; i++) {
             names[i] = GameDialogs.showInputDialog("Player #" + (i+1),"Name of Player #" + (i+1) + ":");
         };
+        
+        Port[] port = new Port[nHuman];
+        Channel[] channel = new Channel[nHuman];
+        Player[] player = new Player[nHuman];
+        for (int i=0; i<nHuman; i++){
+            channel[i] = new Channel();
+            player[i] = new Player(names[i], channel[i].asPort2());
+            port[i] = channel[i].asPort1();
+        }
+        GameMaster gameMaster = new GameMaster(names, nHuman, port);
+        gameMaster.run();
     }	   
 }

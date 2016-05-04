@@ -16,6 +16,7 @@ public class VictoryEvent extends GameEvent {
 	}
 	
 	public void execute(Board board) {
+            
 	}
 	
 	public String getName() {

@@ -14,7 +14,7 @@
         <xs:element ref="move"/>
         <xs:element ref="turn"/>
         <xs:element ref="victory"/>
-	<xs:element ref="destroyed"/>
+		<xs:element ref="destroyed"/>
       </xs:choice>
     </xs:complexType>
   </xs:element>
