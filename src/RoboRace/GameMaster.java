@@ -4,86 +4,78 @@ import java.util.*;
 import java.io.*;
 
 public class GameMaster {
-    
-    private int numberPlayers;
-    private Robot[] robots;
-    private Board board;
-    private CardFactory cardFactory;
-    private Port[] port;
-        
-    public GameMaster(String[] names, int numberPlayers, Port[] port){
-        this.numberPlayers = numberPlayers;
-        this.port = port;
-        robots = new Robot[numberPlayers];
-        for (int i = 0; i < numberPlayers; i++){
-            robots[i] = new Robot(names[i], 2*i + 1);
-        }
-        Factory factory = Factory.load("factory.xml");
-        // Create board
-        board = new Board(factory, numberPlayers, robots);
-        cardFactory = new CardFactory();
-    }
-    
-    public void run() {
-        for (int i = 0; i < numberPlayers; i++){
-            port[i].send(board.toXMLString());
-        }
-        CardList[] playerHand  = new CardList[numberPlayers];
-        for (int i = 0; i < numberPlayers; i++){
-            playerHand[i] = new CardList();
-        }
-        CardList compareCards = new CardList();
-        EventCounter counter = new EventCounter();
-        EventList events = new EventList();
-        
-        while (!events.containsVictory()) {
-            board.revitalize();
-            for (int i = 0; i < numberPlayers; i++) {
-                playerHand[i].clear();
-                for (int j = 0; j < 7; j++){
-                    playerHand[i].add(cardFactory.createCard());
-                }
-            }
-            for (int i = 0; i < numberPlayers; i++) {
-                port[i].send(playerHand[i].toXMLString());
-            }
-            for (int i = 0; i < numberPlayers; i++) {
-                playerHand[i] = CardList.read(new StringReader(port[i].recieve()));
-            }
-            counter.reset();
-            events.clear();
-            for (int i = 0; i < 5; i++){
-                if (events.containsVictory()) break;
-                compareCards.clear();
-                for (int j = 0; j < numberPlayers; j++){
-                    compareCards.add(playerHand[j].get(i));
-                }
-                Collections.sort(compareCards);
-                for (Card card : compareCards) {
-                    int player = -1;
-                    for (int j = 0; j < numberPlayers; j++) {
-                        if (playerHand[j].get(i) == card) {
-                            player = j;
-                        }
-                    }
-                    Robot robot = robots[player];
-                    if (robot.isAlive()) {
-                        card.execute(counter,events,robot,board);
-                    }
-                }
-                for (Robot robot : robots) {
-                    if (robot.isAlive()) {
-                        Location location = board.getLocation(robot.getLocation());
-                        location.effect(counter,events,i,robot,board);
-                    }
-                }
-            }
-            for (int i = 0; i < numberPlayers; i++){
-                port[i].send(events.toXMLString());
-            }
-        }
-        GameDialogs.showMessageDialog("End of Game","The winner is " + events.getWinner() + "!!!");	
-        //for(Player p : players) p.close();
-    }
+
+	private int numberPlayers;
+	private Robot[] robots;
+	private Port[] ports;
+	private Board board;
+	private CardFactory cardFactory;
+	
+	public GameMaster(int numberPlayers, String[] names, Port[] ports) {
+		this.numberPlayers = numberPlayers;
+		this.ports = ports;
+		robots = new Robot[numberPlayers];
+		for (int i=0; i<numberPlayers; i++)
+			robots[i] = new Robot(names[i],2*i+1);
+		Factory factory = Factory.load("factory.xml");
+		board = new Board(factory,numberPlayers,robots);
+		for (Port p : ports) p.send(board.toXMLString());
+		cardFactory = new CardFactory();
+	}
+	
+	public void run() {
+		boolean done = false;
+		CardList[] pCardList  = new CardList[numberPlayers];
+		for(int i=0; i<numberPlayers; i++)
+			pCardList[i] = new CardList();
+		CardList phaseList = new CardList();
+		EventCounter counter = new EventCounter();
+		EventList events = new EventList();
+		int phase;
+		while (!done) {
+			board.revitalize();
+			for (int i=0; i<numberPlayers; i++) {
+				pCardList[i].clear();
+				for (int j=0; j<7; j++)
+					pCardList[i].add(cardFactory.createCard());
+				ports[i].send(pCardList[i].toXMLString());
+			};
+			for (int i=0; i<numberPlayers; i++) {
+				pCardList[i] = CardList.read(new StringReader(ports[i].recieve()));
+			};
+			phase = 0;
+			counter.reset();
+			events.clear();
+			while (phase < 5 && !done) {
+				phase++;
+				phaseList.clear();
+				for (int i=0; i<numberPlayers; i++)
+					phaseList.add(pCardList[i].get(phase-1));
+				Collections.sort(phaseList);
+				for (Card card : phaseList) {
+					int player = -1;
+					for (int i=0; i<numberPlayers; i++) 
+						if (pCardList[i].get(phase-1) == card) 
+							player = i;
+					Robot robot = robots[player];
+					if (robot.isAlive())
+						card.execute(counter,events,robot,board);
+				};
+				for (Robot robot : robots) {
+					if (robot.isAlive()) {
+						Location location = board.getLocation(robot.getLocation());
+						location.effect(counter,events,phase,robot,board);
+					};
+				};
+				done |= events.containsVictory();
+			};
+			for(Port p : ports) p.send(events.toXMLString());
+		};
+		for(Port p : ports)	
+			try {
+				p.close();
+			} catch (Exception e) {};
+	}
+	
 }
 		

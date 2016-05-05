@@ -13,7 +13,7 @@ public class DestroyedEvent extends GameEvent {
 	}
 	
 	public void execute(Board board) {
-            getRobot(board).destroyed();
+		getRobot(board).destroyed();
 	}
 
 	public String toXMLString() {

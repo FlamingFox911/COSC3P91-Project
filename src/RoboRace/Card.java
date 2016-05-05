@@ -20,7 +20,7 @@ public abstract class Card implements Comparable<Card>, XMLObject {
 		return c.priority - priority;
 	}
 	
-	public abstract void execute(EventCounter counter, EventList events, RoboRace.Robot robot, Board board);
+	public abstract void execute(EventCounter counter, EventList events, Robot robot, Board board);
 	
 	public Image getImage() {
 		return image;

@@ -7,14 +7,21 @@ import COSC3P40.xml.*;
 import static COSC3P40.xml.XMLTools.getChildNodes;
 
 public class EventListReader implements XMLNodeConverter<EventList> {
-
-    public EventList convertXMLNode(Node node) {
-        List<Node> in = getChildNodes(node);
-        EventList eventList = new EventList();
-        EventReader eventReader = new EventReader();
-        for (Node i : in){
-            eventList.add(eventReader.convertXMLNode(i));
-        }
-        return eventList;	
-    }
+	
+	private EventReader eventReader;
+	
+	public EventListReader() {
+		eventReader = new EventReader();
+	}
+	
+	public EventList convertXMLNode(Node node) {
+		EventList result = new EventList();
+		if (node.getNodeName().equals("events")) {
+			List<Node> list = getChildNodes(node);
+			for(Node n : list)
+				result.add(eventReader.convertXMLNode(n));
+		};
+		return result;	
+	}
+	
 }

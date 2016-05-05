@@ -16,7 +16,7 @@ public class TurnEvent extends GameEvent {
 	}
 	
 	public void execute(Board board) {
-            getRobot(board).turn(clockwise);
+		getRobot(board).turn(clockwise);
 	}
 	
 	public String toXMLString() {

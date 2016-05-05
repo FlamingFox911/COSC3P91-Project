@@ -4,39 +4,27 @@ import COSC3P40.xml.*;
 import org.w3c.dom.*;
 
 import static COSC3P40.xml.XMLTools.*;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 public class EventReader implements XMLNodeConverter<GameEvent> {
 	
-    public GameEvent convertXMLNode(Node node) {
-        GameEvent gameEvent = null;
-        int step = getIntAttribute(node,"step");
-        int action = getIntAttribute(node,"action");
-        int x = getIntAttribute(node,"x");
-        int y = getIntAttribute(node,"y");
-        EventCounter eventCounter = new EventCounter(step, action);
-        if (node.getNodeName().equals("bump")) {
-            Direction direction = (Direction)getEnumAttribute(Direction.class, node, "direction");
-            gameEvent = new BumpEvent(eventCounter, x, y, direction);
-        }
-        else if (node.getNodeName().equals("destroyed")) {
-            gameEvent = new DestroyedEvent(eventCounter, x, y);
-        }
-        else if (node.getNodeName().equals("halfturn")) {
-            gameEvent = new HalfturnEvent(eventCounter, x, y);
-        }
-        else if (node.getNodeName().equals("move")) {
-            Direction direction = (Direction)getEnumAttribute(Direction.class, node, "direction");
-            gameEvent = new MoveEvent(eventCounter, x, y, direction);
-        }
-        else if (node.getNodeName().equals("turn")) {
-            boolean clockwise = getBoolAttribute(node,"clockwise");
-            gameEvent = new TurnEvent(eventCounter, x, y, clockwise);
-        }
-        else if (node.getNodeName().equals("victory")) {
-            String name = getStringAttribute(node, "name");
-            gameEvent = new VictoryEvent(eventCounter, x, y, name);
-        }
-        return gameEvent;
-    }
+	public GameEvent convertXMLNode(Node node) {
+		GameEvent event = null;
+		String name = node.getNodeName();
+		EventCounter counter = new EventCounter(getIntAttribute(node,"step"),getIntAttribute(node,"action")); 
+		int x = getIntAttribute(node,"x");
+		int y = getIntAttribute(node,"y");
+		if (name.equals("bump"))
+			event = new BumpEvent(counter,x,y,(Direction) getEnumAttribute(Direction.class,node,"direction"));
+		if (name.equals("halfturn")) 
+			event = new HalfturnEvent(counter,x,y);	
+		if (name.equals("move")) 
+			event = new MoveEvent(counter,x,y,(Direction) getEnumAttribute(Direction.class,node,"direction"));
+		if (name.equals("turn")) 
+			event = new TurnEvent(counter,x,y,getBoolAttribute(node,"clockwise"));
+		if (name.equals("victory")) 
+			event = new VictoryEvent(counter,x,y,getStringAttribute(node,"name"));
+		if (name.equals("destroyed")) 
+			event = new DestroyedEvent(counter,x,y);	
+		return event;
+	}
 }

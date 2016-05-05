@@ -13,7 +13,7 @@ public class HalfturnEvent extends GameEvent {
 	}
 	
 	public void execute(Board board) {
-            getRobot(board).halfturn();
+		getRobot(board).halfturn();
 	}
 	
 	public String toXMLString() {

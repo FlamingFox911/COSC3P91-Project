@@ -12,9 +12,9 @@ public class Board implements XMLObject {
 	
 	public static Board read(Reader input) {
 		XMLReader<Board> reader = new XMLReader<Board>();
-        reader.setXMLSchema("board.xsd");
-        reader.setXMLNodeConverter(new BoardReader());
-        return reader.readXML(input);
+                reader.setXMLSchema("board.xsd");
+                reader.setXMLNodeConverter(new BoardReader());
+                return reader.readXML(input);
 	}
 	
 	public Board(Factory factory, int numberRobots, Robot[] robots) {
@@ -115,8 +115,7 @@ public class Board implements XMLObject {
 	
 	public void waitOnRobots() {
 		for(Robot robot : robots) 
-			robot.waitOnRobot();
-		
+			robot.waitOnRobot();		
 	}
 	
 }

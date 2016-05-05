@@ -16,7 +16,7 @@ public class MoveEvent extends GameEvent {
 	}
 	
 	public void execute(Board board) {
-            getRobot(board).move(direction);
+		getRobot(board).move(direction);
 	}
 		
 	public String toXMLString() {
