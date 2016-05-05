@@ -18,6 +18,9 @@ public class Robot implements XMLObject {
 	private float dx;
         private float dy;
         private Animation[] animations;
+        
+        private boolean move = false;
+        private boolean rotate = false;
 	
 	public Robot(String name, int x, int y, Direction direction, boolean alive, int start) {
 	    this.name = name;
@@ -51,30 +54,40 @@ public class Robot implements XMLObject {
 	public void turn(boolean clockwise) {
 		setCurrentAnimation(direction,clockwise);
 		direction = direction.rotate(clockwise);
-                // ...
+                rotate = true;
+                animations[currentAnimation].reset();
+                animations[currentAnimation].start();
         }
 	
 	public void halfturn() {
 		setCurrentAnimation(direction,null);
 		direction = direction.halfturn();
-		// ...
+		rotate = true;
+                animations[currentAnimation].reset();
+                animations[currentAnimation].start();
 	}
         
         public void move(Direction direction) {
 		switch (direction) {
 			case North: location.y--;
-                                    // ....
+                                    dx = (float)0.0;
+                                    dy = (float)-0.2;
                                     break;
 			case East:  location.x++;
-                                    // ....
+                                    dx = (float)0.2;
+                                    dy = (float)0.0;
                                     break;
 			case South: location.y++;
+                                    dx = (float)0.0;
+                                    dy = (float)0.2;
                                     // ....
                                     break;
 			case West:  location.x--;
+                                    dx = (float)-0.2;
+                                    dy = (float)0.0;
                                     // ....
 		};
-		// ....
+		move = true;
 	}
 	
 	private void setCurrentAnimation(Direction direction, Boolean clockwise) {
@@ -136,6 +149,49 @@ public class Robot implements XMLObject {
 	
 	
         public synchronized void update(long elapsedTime) {
+            if(rotate){
+                animations[currentAnimation].update(elapsedTime);
+                if (!animations[currentAnimation].isRunning()){
+                    animations[currentAnimation].reset();
+                    setCurrentAnimation(direction,null);
+                    rotate = false;
+                    notify();
+                }
+            }
+            else if (move){
+                float endX = (float)location.getX()*97 + 17;
+                float endY = (float)location.getY()*97 + 17;
+                screenY += dy*elapsedTime;
+                screenX += dx*elapsedTime;
+                if (dy < 0){
+                    if (endY >= screenY){
+                        screenY = (float)location.getY()*97 + 17;
+                        move = false;
+                        notify();
+                    }
+                }
+                else if (dy > 0){
+                    if (endY <= screenY){
+                        screenY = (float)location.getY()*97 + 17;
+                        move = false;
+                        notify();
+                    }
+                }
+                else if (dx < 0){
+                    if (endX >= screenX){
+                        screenX = (float)location.getX()*97 + 17;
+                        move = false;
+                        notify();
+                    }
+                }
+                else if (dx > 0){
+                    if (endX <= screenX){
+                        screenX = (float)location.getX()*97 + 17;
+                        move = false;
+                        notify();
+                    }
+                }
+            }
     	}
 	
 	public Image getImage() {
@@ -151,5 +207,13 @@ public class Robot implements XMLObject {
 	}
 
 	public synchronized void waitOnRobot() {
+            if (rotate || move){
+                try {
+                    wait();
+                }
+                catch (InterruptedException e) {
+                    
+                }
+            }
         }
 }

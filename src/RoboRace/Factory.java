@@ -62,9 +62,19 @@ public class Factory implements XMLObject {
 	}
 	
 	public void update(long delta) {
+            for (int i = 0; i < xSize; i++){
+                for (int j = 0; j < ySize; j++){
+                    grid[i][j].update(delta);
+                }
+            }
 	}
 	
 	public void draw(Graphics graphics) {
+            for (int i = 0; i < xSize; i++){
+                for (int j = 0; j < ySize; j++){
+                    graphics.drawImage(grid[i][j].getImage(),i*97,j*97,null);
+                }
+            }
 	}
 	
 }
