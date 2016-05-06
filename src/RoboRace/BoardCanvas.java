@@ -10,7 +10,7 @@ public class BoardCanvas extends Canvas implements Runnable {
 	private Board board;
 	private boolean running;
 	private Thread thread;
-        
+	
 	public BoardCanvas(Board board) {
 		this.board = board;
 		Dimension dim = board.getDisplaySize();
@@ -32,23 +32,25 @@ public class BoardCanvas extends Canvas implements Runnable {
 	}
 	
 	public void run() {
-            long currTime = System.currentTimeMillis();
-            this.createBufferStrategy(2);
-            while (true) {
-                long elapsedTime = System.currentTimeMillis() - currTime;
-                currTime += elapsedTime;
-                board.update(elapsedTime);
-                BufferStrategy s = this.getBufferStrategy();
-                Graphics g = s.getDrawGraphics();
-                board.draw(g);
-                g.dispose();
-                s.show();
-                try {
-                    Thread.sleep(20);
-                }
-                catch (InterruptedException ex) {
-                    
-                }
-            }
-        }
+		createBufferStrategy(2);
+		BufferStrategy strategy = getBufferStrategy(); 
+		long lastLoopTime = System.currentTimeMillis();
+		long currentTime;
+		long delta;
+		Graphics graphics;
+		while (running) {
+			currentTime = System.currentTimeMillis();
+			delta = currentTime - lastLoopTime;
+			lastLoopTime = currentTime;
+			board.update(delta);
+			graphics = strategy.getDrawGraphics();
+			board.draw(graphics);
+			graphics.dispose();
+			strategy.show();
+			if (delta < 10) try { 
+				                 Thread.sleep(10-delta); 
+			                } catch (Exception e) {};
+		}
+	}
+	
 }

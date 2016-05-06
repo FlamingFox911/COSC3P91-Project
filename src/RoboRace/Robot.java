@@ -16,20 +16,19 @@ public class Robot implements XMLObject {
 	private float screenX;
 	private float screenY;
 	private float dx;
-        private float dy;
-        private Animation[] animations;
-        
-        private boolean move = false;
-        private boolean rotate = false;
+    private float dy;
+    private boolean rotating;
+    private boolean moving;
+    private Animation[] animations;
 	
 	public Robot(String name, int x, int y, Direction direction, boolean alive, int start) {
 	    this.name = name;
 	    location = new Point(x,y);
-            this.direction = direction;
-            this.alive = alive;
-            this.start = start;
-            initialize();
-            animations = new AnimationFactory().createRobotAnimations(name);
+		this.direction = direction;
+		this.alive = alive;
+		this.start = start;
+		initialize();
+		animations = new AnimationFactory().createRobotAnimations(name);
 	}
 	
 	public Robot(String name, int start) {
@@ -40,6 +39,8 @@ public class Robot implements XMLObject {
 		screenX = 97*location.x+17;
 		screenY = 97*location.y+17;
 		setCurrentAnimation(direction,true);
+		rotating = false;
+		moving = false;
 		alive = true;
 	}
 	
@@ -54,40 +55,15 @@ public class Robot implements XMLObject {
 	public void turn(boolean clockwise) {
 		setCurrentAnimation(direction,clockwise);
 		direction = direction.rotate(clockwise);
-                rotate = true;
-                animations[currentAnimation].reset();
-                animations[currentAnimation].start();
-        }
+		rotating = true;
+		animations[currentAnimation].start();
+	}
 	
 	public void halfturn() {
 		setCurrentAnimation(direction,null);
 		direction = direction.halfturn();
-		rotate = true;
-                animations[currentAnimation].reset();
-                animations[currentAnimation].start();
-	}
-        
-        public void move(Direction direction) {
-		switch (direction) {
-			case North: location.y--;
-                                    dx = (float)0.0;
-                                    dy = (float)-0.2;
-                                    break;
-			case East:  location.x++;
-                                    dx = (float)0.2;
-                                    dy = (float)0.0;
-                                    break;
-			case South: location.y++;
-                                    dx = (float)0.0;
-                                    dy = (float)0.2;
-                                    // ....
-                                    break;
-			case West:  location.x--;
-                                    dx = (float)-0.2;
-                                    dy = (float)0.0;
-                                    // ....
-		};
-		move = true;
+		rotating = true;
+		animations[currentAnimation].start();
 	}
 	
 	private void setCurrentAnimation(Direction direction, Boolean clockwise) {
@@ -147,52 +123,55 @@ public class Robot implements XMLObject {
 		return "<robot name=\"" + name + "\" x=\"" + location.x + "\" y=\"" + location.y + "\" direction=\"" + direction + "\" alive=\"" + alive + "\" start =\"" + start + "\"/>";
 	}
 	
-	
-        public synchronized void update(long elapsedTime) {
-            if(rotate){
-                animations[currentAnimation].update(elapsedTime);
-                if (!animations[currentAnimation].isRunning()){
-                    animations[currentAnimation].reset();
-                    setCurrentAnimation(direction,null);
-                    rotate = false;
-                    notify();
-                }
-            }
-            else if (move){
-                float endX = (float)location.getX()*97 + 17;
-                float endY = (float)location.getY()*97 + 17;
-                screenY += dy*elapsedTime;
-                screenX += dx*elapsedTime;
-                if (dy < 0){
-                    if (endY >= screenY){
-                        screenY = (float)location.getY()*97 + 17;
-                        move = false;
-                        notify();
-                    }
-                }
-                else if (dy > 0){
-                    if (endY <= screenY){
-                        screenY = (float)location.getY()*97 + 17;
-                        move = false;
-                        notify();
-                    }
-                }
-                else if (dx < 0){
-                    if (endX >= screenX){
-                        screenX = (float)location.getX()*97 + 17;
-                        move = false;
-                        notify();
-                    }
-                }
-                else if (dx > 0){
-                    if (endX <= screenX){
-                        screenX = (float)location.getX()*97 + 17;
-                        move = false;
-                        notify();
-                    }
-                }
-            }
-    	}
+	public void move(Direction direction) {
+		switch (direction) {
+			case North: location.y--;
+						dy = (float) -0.2;
+						break;
+			case East:	location.x++;
+						dx = (float) 0.2;
+						break;
+			case South:	location.y++;
+						dy = (float) 0.2;
+						break;
+			case West:	location.x--;
+						dx = (float) -0.2;
+		};
+		moving = true;
+	}
+	 
+    public synchronized void update(long elapsedTime) {
+    	if (rotating) {
+    		animations[currentAnimation].update(elapsedTime);
+    		if (!animations[currentAnimation].isRunning()) {
+    			int n = currentAnimation;
+    			setCurrentAnimation(direction,null);
+    			animations[n].reset();
+    			rotating = false;
+    			notify();
+    		}
+    	};
+    	if (moving) {
+    		float newX = screenX + dx * elapsedTime;
+        	float newY = screenY + dy * elapsedTime;
+        	int stopX = 97*location.x+17;
+        	int stopY = 97*location.y+17;
+        	if ((screenX <= stopX && stopX <= newX) || (newX <= stopX && stopX <= screenX)) {
+        		dx = 0;
+        		newX = stopX;
+       	 	};
+        	if ((screenY <= stopY && stopY <= newY) || (newY <= stopY && stopY <= screenY)) {
+        		dy = 0;
+        		newY = stopY;
+        	};
+        	screenX = newX;
+        	screenY = newY;
+        	if (screenX==stopX && screenY==stopY) {
+        		moving = false;
+        		notify();
+        	};
+        };
+    }
 	
 	public Image getImage() {
 		return animations[currentAnimation].getImage();
@@ -207,13 +186,11 @@ public class Robot implements XMLObject {
 	}
 
 	public synchronized void waitOnRobot() {
-            if (rotate || move){
-                try {
-                    wait();
-                }
-                catch (InterruptedException e) {
-                    
-                }
-            }
-        }
+    	while (moving || rotating) {
+	    	try {
+	    		wait();
+	    	} catch (Exception ex) {};
+	    };
+    }
+    
 }
