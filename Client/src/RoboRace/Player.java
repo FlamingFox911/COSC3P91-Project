@@ -12,7 +12,8 @@ public class Player extends JFrame implements Runnable {
 	private Port port;
 	private BoardCanvas boardCanvas;
 	private CardPane cardPane;
-	
+	public static SoundEffects soundEffects = new SoundEffects();
+        
 	public Player(String name, Port port) {
 		this.name = name;
 		board = null;

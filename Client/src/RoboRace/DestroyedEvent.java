@@ -14,6 +14,7 @@ public class DestroyedEvent extends GameEvent {
 	
 	public void execute(Board board) {
 		getRobot(board).destroyed();
+                Player.soundEffects.playDestroy();
 	}
 
 	public String toXMLString() {

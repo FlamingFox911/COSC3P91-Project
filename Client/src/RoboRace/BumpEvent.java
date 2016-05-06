@@ -16,6 +16,7 @@ public class BumpEvent extends GameEvent {
 	}
 	
 	public void execute(Board board) {
+            Player.soundEffects.playBump();
 	}
 	
 	public String toXMLString() {
